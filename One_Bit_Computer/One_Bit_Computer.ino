@@ -34,44 +34,41 @@ void setup() {
 }
 
 void loop() {
-  clockSpeed = analogRead(0);     // read the input pin
+  // INPUT Read
+  clockSpeed = analogRead(0);
   buttonA = digitalRead(buttonAPin);
   buttonB = digitalRead(buttonBPin);
   
   buttSet = digitalRead(setButPin);
   buttReset = digitalRead(resetButPin);
   
-  Serial.println(clockSpeed);
-//  Serial.println(buttSet);
-//  Serial.println(buttReset);
-  
   delay(clockSpeed/2);
   digitalWrite(clockLedPin, LOW);
   delay(clockSpeed/2);
   digitalWrite(clockLedPin, HIGH);
 
+  // Define and reset vars
   bool digit0;
   bool digit1;
 
-  digitalWrite(adderAPin, digit0);
-  
-  if(buttonA || buttonB){ // MODO SUMA
-    Serial.println("SUMA");
-    if( buttonA && buttonB ){
-      digit0 = false;
-      digit1 = true;
-    }else{
-      digit1 = false;
-      if(buttonA || buttonB){
-        digit0 = true;
-      }else{
-        digit0 = false;
-      }
-    }
-    digitalWrite(adderAPin, digit0);
-    digitalWrite(adderBPin, digit1);
+  // ADDER
+  if( buttonA && buttonB ){
+    digit0 = false;
+    digit1 = true;
+  }else if(buttonA || buttonB){
+    digit0 = true;
+    digit1 = false;
   }else{
-    // MODO RAM
+    digit0 = false;
+    digit1 = false;
+  }
+
+  // Display Result
+  digitalWrite(adderAPin, digit0);
+  digitalWrite(adderBPin, digit1);
+
+  // IF input is not used, read and display RAM state
+  if(!(buttonA || buttonB)){
     Serial.println("RAM Read");
     if(adderALatch){
       digitalWrite(adderAPin, HIGH);  
@@ -83,13 +80,15 @@ void loop() {
     }else{
       digitalWrite(adderBPin, LOW);  
     }
-    
   }
+    
+  // Write to RAM
   if(buttSet){
     Serial.println("RAM Write");
     adderALatch = digit0;
     adderBLatch = digit1;
   }
+  // Erase the RAM
   if(buttReset){
     Serial.println("RAM Erase");
     adderALatch = 0;
